@@ -254,6 +254,12 @@ namespace NEventStore.Persistence.AzureBlob
         /// <returns>A list of all undispatched commits.</returns>
         public IEnumerable<ICommit> GetUndispatchedCommits()
         {
+            if (!_options.LoadUndispatchedCommits)
+            {
+                Logger.Info("Flag set to ignore undispatched commits.  Make sure you have a process to dispatch occasionally of event not being dispatched");
+                yield break;
+            }
+
             Logger.Info("Getting undispatched commits.  This is only done during initialization.  This may take a while...");
             var allCommitDefinitions = new List<Tuple<WrappedPageBlob, PageBlobCommitDefinition>>();
 

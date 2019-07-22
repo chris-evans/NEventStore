@@ -15,9 +15,13 @@ namespace NEventStore.Persistence.AzureBlob
         { get; private set; }
 
         /// <summary>
-        /// Get the maximum timespan to look back in for undispatched commits
+        /// Gets if undispatched commits should be ignored.
         /// </summary>
-        public TimeSpan MaxTimeSpanForUndispatched
+        /// <remarks>
+        /// The process of checking for undispatched commits in Azure Blob is slow today.  This does not need to be done constantly and instead
+        /// can be done as a part of an offline processor rather than every time you are loading aggregates.
+        /// </remarks>
+        public bool LoadUndispatchedCommits
         { get; private set; }
 
         /// <summary>
@@ -60,18 +64,18 @@ namespace NEventStore.Persistence.AzureBlob
             string containerName = "default",
             int parallelConnectionLimit = 10,
             int blobNumPages = 2000)
-            : this(TimeSpan.MaxValue, containerName, parallelConnectionLimit, blobNumPages)
+            : this(true, containerName, parallelConnectionLimit, blobNumPages)
         { }
 
         /// <summary>
         /// Create a new AzureBlobPersistenceOptions
         /// </summary>
-        /// <param name="maxTimeSpanForUndispatched">maximum amount of history to go back in for looking for undispatched commits.  smaller values will imrpove performance, but increase the risk of missing a commit</param>
+        /// <param name="loadUndispatchedCommits">maximum amount of history to go back in for looking for undispatched commits.  smaller values will imrpove performance, but increase the risk of missing a commit</param>
         /// <param name="containerName">name of the container within the azure storage account</param>
         /// <param name="containerType">typeof container</param>
         /// <param name="parallelConnectionLimit">maximum parallel connection that can be made to the storage account at once</param>
         public AzureBlobPersistenceOptions(
-            TimeSpan maxTimeSpanForUndispatched,
+            bool loadUndispatchedCommits,
             string containerName = "default",
             int parallelConnectionLimit = 10,
             int blobNumPages = 2000)
@@ -89,7 +93,7 @@ namespace NEventStore.Persistence.AzureBlob
             }
             ContainerName = containerName;
             ParallelConnectionLimit = parallelConnectionLimit;
-            MaxTimeSpanForUndispatched = maxTimeSpanForUndispatched;
+            LoadUndispatchedCommits = loadUndispatchedCommits;
             BlobNumPages = blobNumPages;
         }
     }
