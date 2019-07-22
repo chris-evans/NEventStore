@@ -22,8 +22,8 @@ namespace AlphaTester
 				{ repoType = eRepositoryType.Sql; }
 			}
 
-			var eventsPerAggregate = 10;
-			var aggregatesToMake = 10;
+			var eventsPerAggregate = 1;
+			var aggregatesToMake = 50;
 			if (args.Length > 1)
 			{ aggregatesToMake = Convert.ToInt32(args[1]); }
 
@@ -43,7 +43,7 @@ namespace AlphaTester
 				Stopwatch creationTimer = new Stopwatch();
 				creationTimer.Start();
 				values.Add(42);
-				Thread.Sleep(new Random().Next(0, 1000));
+				//Thread.Sleep(new Random().Next(0, 1000));
 				var aggy = SimpleAggregate.CreateNew(DateTime.Now, aggregateId, 42);
 
 				while (true)
@@ -76,7 +76,7 @@ namespace AlphaTester
 
                 SnapshotAggregate(repoType, aggy.Id);
 
-                // now add some more stuff... this will be used to verify our snapshot is working as expected
+                //now add some more stuff... this will be used to verify our snapshot is working as expected
                 Parallel.For(0, eventsPerAggregate, options, (j) =>
                 {
                     try
@@ -85,7 +85,7 @@ namespace AlphaTester
                     { _log.Error("error iteration {0}-{1}, {2}", i, j, ex.ToString()); }
 
                 });
-                
+
                 history.Add(new Tuple<Guid, ConcurrentBag<int>>(aggregateId, values));
 				_log.Trace(string.Format("Iteration [{0}] took me [{1}] ms", i, sw.ElapsedMilliseconds));
 			});
@@ -112,7 +112,8 @@ namespace AlphaTester
 		private static int RetryWhileConcurrent(eRepositoryType repoType, Guid aggyId, int value)
 		{
 			var rand = new Random(Guid.NewGuid().GetHashCode());
-            int testValue = rand.Next(513, (int)(1024 * 1024 * .3 + 8));
+            //int testValue = rand.Next(513, (int)(1024 * 1024 * .3 + 8));
+            int testValue = 10;
 
 			while (true)
 			{

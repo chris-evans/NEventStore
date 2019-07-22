@@ -79,9 +79,9 @@ namespace AlphaTester
         private Wireup WireupAzureBlobRepository(Wireup wireup)
         {
 
-            var connectionString = "DefaultEndpointsProtocol=https;AccountName=bobafett;AccountKey=Kb2P5rdCo7l6hCPZCXyw2aSyL/bSabpVihORH/zuF5PUMOxt7Zz850SyC3wMetkGRyMgEh44HDo0qd9dmPNJ0Q==";
+            var connectionString = "DefaultEndpointsProtocol=https;AccountName=evanstestinges;AccountKey=ny1GdynBXGI/kg3psynNvIikgIUcJ59xP40pIcKAzGc02iJ4USZASwFyFgoe+KY4ZA+oF23PkvgYTgAww/12ig==;EndpointSuffix=core.windows.net";
             //var connectionString = "DefaultEndpointsProtocol=https;AccountName=devtesting22;AccountKey=rbjoU5Au59V3JtHjs77hZWizhmUsadetfFTGi1L212itId3GS4Igdgq1P3Wdcr+Ojvwp06UiSheQSxdQiAlmQw==";       // evans
-            var blobOptions = new AzureBlobPersistenceOptions("alphatester");
+            var blobOptions = new AzureBlobPersistenceOptions(false, "alphatester");
             var eventStore = new byte[] { 80, 94, 86, 128, 97, 74, 65, 94, 91, 126, 62, 52, 129, 114, 86, 107, 80, 94, 86, 128, 97, 74, 65, 94, 91, 126, 62, 52, 129, 114, 86, 107 };
             return wireup
                 .UsingAzureBlobPersistence(connectionString, blobOptions)

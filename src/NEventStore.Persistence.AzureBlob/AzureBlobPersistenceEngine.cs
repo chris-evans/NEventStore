@@ -5,9 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using NEventStore.Logging;
 using NEventStore.Serialization;
 
@@ -41,7 +40,6 @@ namespace NEventStore.Persistence.AzureBlob
         private readonly ISerialize _serializer;
         private readonly AzureBlobPersistenceOptions _options;
         private readonly CloudBlobClient _blobClient;
-        private readonly CloudTableClient _checkpointTableClient;
         private readonly CloudBlobContainer _primaryContainer;
         private readonly string _connectionString;
         private int _initialized;
@@ -68,7 +66,6 @@ namespace NEventStore.Persistence.AzureBlob
             _connectionString = connectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
             _blobClient = storageAccount.CreateCloudBlobClient();
-            _checkpointTableClient = storageAccount.CreateCloudTableClient();
             _primaryContainer = _blobClient.GetContainerReference(GetContainerName());
         }
 
@@ -101,7 +98,7 @@ namespace NEventStore.Persistence.AzureBlob
                 var pageBlobReference = blobContainer.GetPageBlobReference(_checkpointBlobName);
                 try
                 { pageBlobReference.Create(512, accessCondition: AccessCondition.GenerateIfNoneMatchCondition("*")); }
-                catch (Microsoft.WindowsAzure.Storage.StorageException ex)
+                catch (StorageException ex)
                 {
                     // 409 means it was already there
                     if (!ex.Message.Contains("409"))
@@ -365,8 +362,6 @@ namespace NEventStore.Persistence.AzureBlob
         /// <param name="commit">The commit object to mark as dispatched.</param>
         public void MarkCommitAsDispatched(ICommit commit)
         {
-            AddCheckpointTableEntry(commit);
-
             var pageBlob = WrappedPageBlob.GetAssumingExists(_primaryContainer, commit.BucketId + "/" + commit.StreamId);
             HeaderDefinitionMetadata headerDefinition = null;
             var header = GetHeaderWithRetry(pageBlob, out headerDefinition);
@@ -829,38 +824,6 @@ namespace NEventStore.Persistence.AzureBlob
             var checkpointBlob = WrappedPageBlob.CreateNewIfNotExists(blobContainer, _checkpointBlobName, 1);
             ((CloudPageBlob)checkpointBlob).SetSequenceNumber(SequenceNumberAction.Increment, null);
             return (ulong)((CloudPageBlob)checkpointBlob).Properties.PageBlobSequenceNumber.Value;
-        }
-
-        /// <summary>
-        /// Adds a checkpoint to our table storage account allowing for simple
-        /// commit replay at a later time.
-        /// </summary>
-        /// <param name="commit"></param>
-        private void AddCheckpointTableEntry(ICommit commit)
-        {
-            var tableName = string.Format("chpt{0}{1}", GetContainerName(), commit.BucketId);
-            var table = _checkpointTableClient.GetTableReference(tableName);
-
-            Action addCheckpointDelegate = () => {
-                var entity = new CheckpointTableEntity(commit);
-                var insertOperation = TableOperation.InsertOrReplace(entity);
-                table.Execute(insertOperation);
-            };
-
-            try
-            { addCheckpointDelegate(); }
-            catch (Microsoft.WindowsAzure.Storage.StorageException ex)
-            {
-                if (ex.InnerException != null && ex.InnerException is WebException &&
-                    ((WebException)(ex.InnerException)).Status == WebExceptionStatus.ProtocolError &&
-                    ((HttpWebResponse)(((WebException)(ex.InnerException)).Response)).StatusCode == HttpStatusCode.NotFound)
-                {
-                    table.CreateIfNotExists();
-                    addCheckpointDelegate();
-                }
-                else
-                { throw; }
-            }
         }
 
         #endregion
