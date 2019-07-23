@@ -25,18 +25,6 @@ namespace NEventStore.Persistence.AzureBlob
         { get; private set; }
 
         /// <summary>
-        /// Get if unique checkpoints should be enforced.
-        /// </summary>
-        /// <remarks>
-        /// unique checkpoints mean no commit will ever have the same checkpoint.  in order to accomplish this
-        /// a performance hit will be taken on high throughput systems given they must optimistically generate a checkpoint.
-        /// if your system is ok with some level of duplicate, yet incrementing checkpoints, this value should be set to false
-        /// to improve system performance.
-        /// </remarks>
-        public bool ForceUniqueCheckpoint
-        { get; private set; }
-
-        /// <summary>
         /// Get the maximum number of parallel rest connections that can be made to the blob storage at once.
         /// </summary>
         /// <remarks>
