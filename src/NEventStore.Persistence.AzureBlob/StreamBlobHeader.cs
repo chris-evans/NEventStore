@@ -13,7 +13,7 @@ namespace NEventStore.Persistence.AzureBlob
 		private List<PageBlobCommitDefinition> _pageBlobCommitDefinitions;
 
 		/// <summary>
-		/// List of commits indices ( in _pageBlobCommitDefinitions ) that are undispatched. 
+		/// Indicates if the aggregate has any undispatched commits 
 		/// </summary>
 		public int UndispatchedCommitCount
 		{ get; set; }

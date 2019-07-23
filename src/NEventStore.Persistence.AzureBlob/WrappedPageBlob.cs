@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using NEventStore.Logging;
-using AzureStorage = Microsoft.WindowsAzure.Storage;
 
 namespace NEventStore.Persistence.AzureBlob
 {
@@ -151,7 +150,7 @@ namespace NEventStore.Persistence.AzureBlob
 				Logger.Verbose("Fetching attributes for blob [{0}]", _pageBlob.Uri);
 				_pageBlob.FetchAttributes(accessCondition);
 			}
-			catch (AzureStorage.StorageException ex)
+			catch (StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -165,7 +164,7 @@ namespace NEventStore.Persistence.AzureBlob
 
 			try
 			{ _pageBlob.SetMetadata(AccessCondition.GenerateIfMatchCondition(_pageBlob.Properties.ETag)); }
-			catch (AzureStorage.StorageException ex)
+			catch (StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -188,7 +187,7 @@ namespace NEventStore.Persistence.AzureBlob
 					accessCondition);
 				return data;
 			}
-			catch (AzureStorage.StorageException ex)
+			catch (StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -269,7 +268,7 @@ namespace NEventStore.Persistence.AzureBlob
 
 				Logger.Verbose("Wrote [{0}] bytes for blob [{1}], etag [{2}]", pageDataWithHeaderAligned.Length, _pageBlob.Uri, _pageBlob.Properties.ETag);
 			}
-			catch (AzureStorage.StorageException ex)
+			catch (StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -288,7 +287,7 @@ namespace NEventStore.Persistence.AzureBlob
 				newSize = GetPageAlignedSize(neededSize);
 				_pageBlob.Resize(newSize, AccessCondition.GenerateIfMatchCondition(_pageBlob.Properties.ETag));
 			}
-			catch (Microsoft.WindowsAzure.Storage.StorageException ex)
+			catch (StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -308,7 +307,7 @@ namespace NEventStore.Persistence.AzureBlob
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <returns></returns>
-		private static Exception HandleAndRemapCommonExceptions(Microsoft.WindowsAzure.Storage.StorageException ex)
+		private static Exception HandleAndRemapCommonExceptions(StorageException ex)
 		{
 			if (ex.Message.Contains("412"))
 			{ return new ConcurrencyException("concurrency detected.  see inner exception for details", ex); }
