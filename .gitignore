@@ -15,3 +15,4 @@ _dotCover.*
 [Pp]ublish
 *.ide
 *nunit.TestResult.*.xml
+/src/.vs/NEventStore/v16/Server/sqlite3
