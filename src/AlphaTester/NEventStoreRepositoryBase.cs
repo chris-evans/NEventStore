@@ -1,16 +1,11 @@
 ﻿using NEventStore;
 using NEventStore.Dispatcher;
-using NEventStore.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NEventStore.Persistence.AzureBlob;
-using NEventStore.Persistence.Sql.SqlDialects;
 using NEventStore.Persistence.Sql;
-using System.Text.RegularExpressions;
+using NEventStore.Persistence.Sql.SqlDialects;
+using System;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 
 namespace AlphaTester
 {
@@ -97,7 +92,6 @@ namespace AlphaTester
         /// <returns></returns>
         private Wireup WireupSqlServerRepository(Wireup wireup)
         {
-
             // we need to make sure the database exists and also pull the db name out of the connection string
             var connectionString = new ConfigurationConnectionFactory("EventStore_SqlServer").Settings.ConnectionString;
             var databaseNameRegex = @"(Initial Catalog=.*$)|(Initial Catalog=.*[;])";

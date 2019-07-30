@@ -294,4 +294,19 @@
   <data name="StreamIdIsNullEmptyOrWhiteSpace" xml:space="preserve">
     <value>streamId is null, empty, or whitespace.</value>
   </data>
+  <data name="AutoDetectDialect" xml:space="preserve">
+    <value>Configuring SQL engine to auto-detect dialect.</value>
+  </data>
+  <data name="ConnectionFactorySpecified" xml:space="preserve">
+    <value>Using SQL connection factory of type '{0}'.</value>
+  </data>
+  <data name="DialectSpecified" xml:space="preserve">
+    <value>Registering SQL dialect of type '{0}'.</value>
+  </data>
+  <data name="PagingSpecified" xml:space="preserve">
+    <value>Persistence engine configured to page every '{0}' records.</value>
+  </data>
+  <data name="StreamIdHasherSpecified" xml:space="preserve">
+    <value>Registering stream ID hasher of type '{0}'</value>
+  </data>
 </root>

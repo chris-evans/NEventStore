@@ -4,15 +4,19 @@
     using System.Data;
     using System.Transactions;
     using FakeItEasy;
+    using FluentAssertions;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using NEventStore.Serialization;
     using Xunit;
-    using Xunit.Should;
 
-    public class when_persisting_a_commit : SpecificationBase
+    public class when_persisting_a_commit : SpecificationBase<TestFixture>
     {
         private InheritedSqlPersistenceEngine _sqlPersistenceEngine;
+
+        public when_persisting_a_commit(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -38,8 +42,8 @@
         [Fact]
         public void should_raise_BeforePersistCommit_event()
         {
-            _sqlPersistenceEngine.RaisedCommand.ShouldNotBeNull();
-            _sqlPersistenceEngine.RaisedCommitAttempt.ShouldNotBeNull();
+            _sqlPersistenceEngine.RaisedCommand.Should().NotBeNull();
+            _sqlPersistenceEngine.RaisedCommitAttempt.Should().NotBeNull();
         }
 
         private class InheritedSqlPersistenceEngine : SqlPersistenceEngine
@@ -73,10 +77,14 @@
         }
     }
 
-    public class when_hasher_returns_null : SpecificationBase
+    public class when_hasher_returns_null : SpecificationBase<TestFixture>
     {
         private SqlPersistenceEngine _sqlPersistenceEngine;
         private Exception _exception;
+
+        public when_hasher_returns_null(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -98,14 +106,18 @@
         [Fact]
         public void should_raise_invalid_operation_exception()
         {
-            _exception.ShouldBeInstanceOf<InvalidOperationException>();
+            _exception.Should().BeOfType<InvalidOperationException>();
         }
     }
 
-    public class when_hasher_returns_whitespace: SpecificationBase
+    public class when_hasher_returns_whitespace: SpecificationBase<TestFixture>
     {
         private SqlPersistenceEngine _sqlPersistenceEngine;
         private Exception _exception;
+
+        public when_hasher_returns_whitespace(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -127,14 +139,18 @@
         [Fact]
         public void should_raise_invalid_operation_exception()
         {
-            _exception.ShouldBeInstanceOf<InvalidOperationException>();
+            _exception.Should().BeOfType<InvalidOperationException>();
         }
     }
 
-    public class when_hasher_returns_empty : SpecificationBase
+    public class when_hasher_returns_empty : SpecificationBase<TestFixture>
     {
         private SqlPersistenceEngine _sqlPersistenceEngine;
         private Exception _exception;
+
+        public when_hasher_returns_empty(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -156,14 +172,18 @@
         [Fact]
         public void should_raise_invalid_operation_exception()
         {
-            _exception.ShouldBeInstanceOf<InvalidOperationException>();
+            _exception.Should().BeOfType<InvalidOperationException>();
         }
     }
 
-    public class when_hasher_returns_string_longer_than_40_characters : SpecificationBase
+    public class when_hasher_returns_string_longer_than_40_characters : SpecificationBase<TestFixture>
     {
         private SqlPersistenceEngine _sqlPersistenceEngine;
         private Exception _exception;
+
+        public when_hasher_returns_string_longer_than_40_characters(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -185,7 +205,7 @@
         [Fact]
         public void should_raise_invalid_operation_exception()
         {
-            _exception.ShouldBeInstanceOf<InvalidOperationException>();
+            _exception.Should().BeOfType<InvalidOperationException>();
         }
     }
 }

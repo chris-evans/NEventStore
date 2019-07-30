@@ -4,110 +4,184 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using FluentAssertions;
     using NEventStore.Conversion;
     using NEventStore.Persistence;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
 
     public class when_opening_a_commit_that_does_not_have_convertible_events : using_event_converter
     {
-        private ICommit _commit;
+        private ICommit Commit
+        {
+            get
+            { return Fixture.Variables["commit"] as ICommit; }
+            set
+            { Fixture.Variables["commit"] = value; }
+        }
 
-        private ICommit _converted;
+        private ICommit Converted
+        {
+            get
+            { return Fixture.Variables["converted"] as ICommit; }
+            set
+            { Fixture.Variables["converted"] = value; }
+        }
+
+        public when_opening_a_commit_that_does_not_have_convertible_events(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _commit =  CreateCommit(new EventMessage {Body = new NonConvertingEvent()});
+            Commit =  CreateCommit(new EventMessage {Body = new NonConvertingEvent()});
         }
 
         protected override void Because()
         {
-            _converted = EventUpconverter.Select(_commit);
+            Converted = EventUpconverter.Select(Commit);
         }
 
         [Fact]
         public void should_not_be_converted()
         {
-            _converted.ShouldBeSameAs(_commit);
+            Converted.Should().BeSameAs(Commit);
         }
 
         [Fact]
         public void should_have_the_same_instance_of_the_event()
         {
-            _converted.Events.Single().ShouldBe(_commit.Events.Single());
+            Converted.Events.Single().Should().Be(Commit.Events.Single());
         }
     }
 
     public class when_opening_a_commit_that_has_convertible_events : using_event_converter
     {
-        private ICommit _commit;
+        private Guid Id
+        {
+            get
+            { return (Guid)Fixture.Variables["id"]; }
+            set
+            { Fixture.Variables["id"] = value; }
+        }
 
-        private readonly Guid _id = Guid.NewGuid();
-        private ICommit _converted;
+        private ICommit Commit
+        {
+            get
+            { return Fixture.Variables["commit"] as ICommit; }
+            set
+            { Fixture.Variables["commit"] = value; }
+        }
+
+        private ICommit Converted
+        {
+            get
+            { return Fixture.Variables["converted"] as ICommit; }
+            set
+            { Fixture.Variables["converted"] = value; }
+        }
+
+        public when_opening_a_commit_that_has_convertible_events(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _commit = CreateCommit(new EventMessage {Body = new ConvertingEvent(_id)});
+            Id = Guid.NewGuid();
+            Commit = CreateCommit(new EventMessage {Body = new ConvertingEvent(Id)});
         }
 
         protected override void Because()
         {
-            _converted = EventUpconverter.Select(_commit);
+            Converted = EventUpconverter.Select(Commit);
         }
 
         [Fact]
         public void should_be_of_the_converted_type()
         {
-            _converted.Events.Single().Body.GetType().ShouldBe(typeof (ConvertingEvent3));
+            Converted.Events.Single().Body.GetType().Should().Be(typeof (ConvertingEvent3));
         }
 
         [Fact]
         public void should_have_the_same_id_of_the_commited_event()
         {
-            ((ConvertingEvent3) _converted.Events.Single().Body).Id.ShouldBe(_id);
+            ((ConvertingEvent3) Converted.Events.Single().Body).Id.Should().Be(Id);
         }
     }
 
-// ReSharper disable InconsistentNaming
     public class when_an_event_converter_implements_the_IConvertEvents_interface_explicitly : using_event_converter
-// ReSharper restore InconsistentNaming
     {
-        private ICommit _commit;
-        private readonly Guid _id = Guid.NewGuid();
-        private ICommit _converted;
-        private EventMessage _eventMessage;
+        private Guid Id
+        {
+            get
+            { return (Guid) Fixture.Variables["id"]; }
+            set
+            { Fixture.Variables["id"] = value; }
+        }
+
+        private ICommit Commit
+        {
+            get
+            { return Fixture.Variables["commit"] as ICommit; }
+            set
+            { Fixture.Variables["commit"] = value; }
+        }
+
+        private ICommit Converted
+        {
+            get
+            { return Fixture.Variables["converted"] as ICommit; }
+            set
+            { Fixture.Variables["converted"] = value; }
+        }
+
+        private EventMessage EventMessage
+        {
+            get
+            { return Fixture.Variables["eventMessage"] as EventMessage; }
+            set
+            { Fixture.Variables["eventMessage"] = value; }
+        }
+
+        public when_an_event_converter_implements_the_IConvertEvents_interface_explicitly(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _eventMessage = new EventMessage {Body = new ConvertingEvent2(_id, "FooEvent")};
+            Id = Guid.NewGuid();
+            EventMessage = new EventMessage {Body = new ConvertingEvent2(Id, "FooEvent")};
 
-            _commit = CreateCommit(_eventMessage);
+            Commit = CreateCommit(EventMessage);
         }
 
         protected override void Because()
         {
-            _converted = EventUpconverter.Select(_commit);
+            Converted = EventUpconverter.Select(Commit);
         }
 
         [Fact]
         public void should_be_of_the_converted_type()
         {
-            _converted.Events.Single().Body.GetType().ShouldBe(typeof (ConvertingEvent3));
+            Converted.Events.Single().Body.GetType().Should().Be(typeof (ConvertingEvent3));
         }
 
         [Fact]
         public void should_have_the_same_id_of_the_commited_event()
         {
-            ((ConvertingEvent3) _converted.Events.Single().Body).Id.ShouldBe(_id);
+            ((ConvertingEvent3)Converted.Events.Single().Body).Id.Should().Be(Id);
         }
     }
 
-    public class using_event_converter : SpecificationBase
+    public class using_event_converter : SpecificationBase<TestFixture>
     {
         private IEnumerable<Assembly> _assemblies;
         private Dictionary<Type, Func<object, object>> _converters;
         private EventUpconverterPipelineHook _eventUpconverter;
+
+        public using_event_converter(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected EventUpconverterPipelineHook EventUpconverter
         {
