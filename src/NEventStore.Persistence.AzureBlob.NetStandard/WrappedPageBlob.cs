@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using NEventStore.Logging;
+using AzStorage = Microsoft.Azure.Storage;
 
 namespace NEventStore.Persistence.AzureBlob
 {
@@ -150,7 +151,7 @@ namespace NEventStore.Persistence.AzureBlob
 				Logger.Verbose("Fetching attributes for blob [{0}]", _pageBlob.Uri);
 				_pageBlob.FetchAttributes(accessCondition);
 			}
-			catch (StorageException ex)
+			catch (AzStorage.StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -164,7 +165,7 @@ namespace NEventStore.Persistence.AzureBlob
 
 			try
 			{ _pageBlob.SetMetadata(AccessCondition.GenerateIfMatchCondition(_pageBlob.Properties.ETag)); }
-			catch (StorageException ex)
+			catch (AzStorage.StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -187,7 +188,7 @@ namespace NEventStore.Persistence.AzureBlob
 					accessCondition);
 				return data;
 			}
-			catch (StorageException ex)
+			catch (AzStorage.StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -268,7 +269,7 @@ namespace NEventStore.Persistence.AzureBlob
 
 				Logger.Verbose("Wrote [{0}] bytes for blob [{1}], etag [{2}]", pageDataWithHeaderAligned.Length, _pageBlob.Uri, _pageBlob.Properties.ETag);
 			}
-			catch (StorageException ex)
+			catch (AzStorage.StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -287,7 +288,7 @@ namespace NEventStore.Persistence.AzureBlob
 				newSize = GetPageAlignedSize(neededSize);
 				_pageBlob.Resize(newSize, AccessCondition.GenerateIfMatchCondition(_pageBlob.Properties.ETag));
 			}
-			catch (StorageException ex)
+			catch (AzStorage.StorageException ex)
 			{ throw HandleAndRemapCommonExceptions(ex); }
 		}
 
@@ -307,9 +308,9 @@ namespace NEventStore.Persistence.AzureBlob
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <returns></returns>
-		private static Exception HandleAndRemapCommonExceptions(StorageException ex)
+		private static Exception HandleAndRemapCommonExceptions(AzStorage.StorageException ex)
 		{
-			if (ex.Message.Contains("412"))
+			if (ex.RequestInformation.HttpStatusCode == 412)
 			{ return new ConcurrencyException("concurrency detected.  see inner exception for details", ex); }
 			else
 			{ return ex; }

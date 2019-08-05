@@ -98,12 +98,8 @@ namespace NEventStore.Persistence.AzureBlob
                 var pageBlobReference = blobContainer.GetPageBlobReference(_checkpointBlobName);
                 try
                 { pageBlobReference.Create(512, accessCondition: AccessCondition.GenerateIfNoneMatchCondition("*")); }
-                catch (StorageException ex)
-                {
-                    // 409 means it was already there
-                    if (!ex.Message.Contains("409"))
-                    { throw; }
-                }
+                catch (Microsoft.Azure.Storage.StorageException ex) when (ex.RequestInformation.HttpStatusCode != 409)
+                { throw; }
             }
 
             if (Interlocked.Increment(ref _initialized) < 2)
