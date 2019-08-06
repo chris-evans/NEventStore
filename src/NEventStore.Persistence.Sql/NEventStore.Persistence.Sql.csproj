@@ -147,9 +147,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NEventStore.NetStandard\NEventStore.NetStandard.csproj">
-      <Project>{790db8f9-f7ab-49fd-9ac2-f773aeeafc54}</Project>
-      <Name>NEventStore.NetStandard</Name>
+    <ProjectReference Include="..\NEventStore\NEventStore.csproj">
+      <Project>{b2815441-6cd7-4bd1-8154-d6d5e0aa6b39}</Project>
+      <Name>NEventStore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

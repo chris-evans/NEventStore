@@ -117,10 +117,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NEventStore.NetStandard\NEventStore.NetStandard.csproj">
-      <Project>{790db8f9-f7ab-49fd-9ac2-f773aeeafc54}</Project>
-      <Name>NEventStore.NetStandard</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NEventStore.Persistence.AcceptanceTests\NEventStore.Persistence.AcceptanceTests.csproj">
       <Project>{3FE594FE-16FF-4405-97D5-5A58FB12520B}</Project>
       <Name>NEventStore.Persistence.AcceptanceTests</Name>
@@ -128,6 +124,10 @@
     <ProjectReference Include="..\NEventStore.Persistence.Sql\NEventStore.Persistence.Sql.csproj">
       <Project>{c388c68e-c7b5-40c5-b177-86f58cb001ad}</Project>
       <Name>NEventStore.Persistence.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NEventStore\NEventStore.csproj">
+      <Project>{b2815441-6cd7-4bd1-8154-d6d5e0aa6b39}</Project>
+      <Name>NEventStore</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
