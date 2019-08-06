@@ -9,6 +9,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using NEventStore.Logging;
 using NEventStore.Serialization;
+using AzStorage = Microsoft.Azure.Storage;
 
 namespace NEventStore.Persistence.AzureBlob
 {
