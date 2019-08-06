@@ -1,16 +1,20 @@
 ﻿namespace NEventStore.Persistence.Sql
 {
     using System;
+    using FluentAssertions;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using NEventStore.Persistence.Sql.SqlDialects;
     using NEventStore.Serialization;
     using Xunit;
-    using Xunit.Should;
 
-    public class when_creating_sql_persistence_factory_with_oracle_native_dialect : SpecificationBase
+    public class when_creating_sql_persistence_factory_with_oracle_native_dialect : SpecificationBase<TestFixture>
     {
         private Exception _exception;
+
+        public when_creating_sql_persistence_factory_with_oracle_native_dialect(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Because()
         {
@@ -22,7 +26,7 @@
         [Fact]
         public void should_not_throw()
         {
-           _exception.ShouldBeNull();
+           _exception.Should().BeNull();
         }
     }
 }

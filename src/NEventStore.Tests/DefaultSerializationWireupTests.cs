@@ -1,5 +1,6 @@
 ﻿namespace NEventStore
 {
+    using FluentAssertions;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using System;
@@ -7,15 +8,19 @@
     using System.Linq;
     using System.Text;
     using Xunit;
-    using Xunit.Should;
 
     public class DefaultSerializationWireupTests
     {
-        public class when_building_an_event_store_without_an_explicit_serializer : SpecificationBase
+        public class when_building_an_event_store_without_an_explicit_serializer : SpecificationBase<TestFixture>
         {
             private Wireup _wireup;
             private Exception _exception;
             private IStoreEvents _eventStore;
+
+            public when_building_an_event_store_without_an_explicit_serializer(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Context()
             {
                 _wireup = Wireup.Init()
@@ -36,7 +41,7 @@
             [Fact]
             public void should_not_throw_an_argument_null_exception()
             {
-                _exception.ShouldNotBeInstanceOf<ArgumentNullException>();
+                _exception.Should().BeNull();
             }
         }
     }

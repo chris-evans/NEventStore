@@ -97,6 +97,15 @@ namespace NEventStore.Persistence.Sql {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configuring SQL engine to auto-detect dialect..
+        /// </summary>
+        internal static string AutoDetectDialect {
+            get {
+                return ResourceManager.GetString("AutoDetectDialect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A connection could not be created for the specified named connection..
         /// </summary>
         internal static string BadConnectionName {
@@ -196,6 +205,15 @@ namespace NEventStore.Persistence.Sql {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Using SQL connection factory of type &apos;{0}&apos;..
+        /// </summary>
+        internal static string ConnectionFactorySpecified {
+            get {
+                return ResourceManager.GetString("ConnectionFactorySpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find connection name &apos;{0}&apos; in the configuration file..
         /// </summary>
         internal static string ConnectionNotFound {
@@ -237,6 +255,15 @@ namespace NEventStore.Persistence.Sql {
         internal static string DeserializingSnapshot {
             get {
                 return ResourceManager.GetString("DeserializingSnapshot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Registering SQL dialect of type &apos;{0}&apos;..
+        /// </summary>
+        internal static string DialectSpecified {
+            get {
+                return ResourceManager.GetString("DialectSpecified", resourceCulture);
             }
         }
         
@@ -502,6 +529,15 @@ namespace NEventStore.Persistence.Sql {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Persistence engine configured to page every &apos;{0}&apos; records..
+        /// </summary>
+        internal static string PagingSpecified {
+            get {
+                return ResourceManager.GetString("PagingSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Purging all stored data for bucket &apos;{0}&apos;..
         /// </summary>
         internal static string PurgingBucket {
@@ -552,6 +588,15 @@ namespace NEventStore.Persistence.Sql {
         internal static string StorageThrewException {
             get {
                 return ResourceManager.GetString("StorageThrewException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Registering stream ID hasher of type &apos;{0}&apos;.
+        /// </summary>
+        internal static string StreamIdHasherSpecified {
+            get {
+                return ResourceManager.GetString("StreamIdHasherSpecified", resourceCulture);
             }
         }
         

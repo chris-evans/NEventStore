@@ -1,17 +1,21 @@
 ﻿namespace NEventStore
 {
     using System;
+    using FluentAssertions;
     using NEventStore.Dispatcher;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
 
     public class NoopDispatcherSchedulerWireupTests
     {
-        public class when_configured_to_auto_start_by_default : SpecificationBase
+        public class when_configured_to_auto_start_by_default : SpecificationBase<TestFixture>
         {
             private IStoreEvents _eventStore;
             private DummyDispatchCommits _dummyDispatchCommits;
+
+            public when_configured_to_auto_start_by_default(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -40,7 +44,7 @@
             [Fact]
             public void should_not_dispatch_event()
             {
-                _dummyDispatchCommits.Dispatched.ShouldBeFalse();
+                _dummyDispatchCommits.Dispatched.Should().BeFalse();
             }
         }
 

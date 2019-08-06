@@ -13,34 +13,83 @@ namespace NEventStore.DispatcherTests
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
 
-    public class when_instantiating_the_asynchronous_dispatch_scheduler : SpecificationBase
+    public class when_instantiating_the_asynchronous_dispatch_scheduler : SpecificationBase<TestFixture>
     {
-        private readonly IDispatchCommits dispatcher = A.Fake<IDispatchCommits>();
-        private readonly IPersistStreams persistence = A.Fake<IPersistStreams>();
-        private ICommit[] _commits;
-        private ICommit firstCommit, lastCommit;
-        private AsynchronousDispatchScheduler _dispatchScheduler;
+        public IDispatchCommits Dispatcher
+        {
+            get
+            { return Fixture.Variables["dispatcher"] as IDispatchCommits; }
+            set
+            { Fixture.Variables["dispatcher"] = value; }
+        }
+
+        public IPersistStreams Persistence
+        {
+            get
+            { return Fixture.Variables["persistence"] as IPersistStreams; }
+            set
+            { Fixture.Variables["persistence"] = value; }
+        }
+
+        private AsynchronousDispatchScheduler DispatchScheduler
+        {
+            get
+            { return Fixture.Variables["dispatchScheduler"] as AsynchronousDispatchScheduler; }
+            set
+            { Fixture.Variables["dispatchScheduler"] = value; }
+        }
+
+        public ICommit[] Commits
+        {
+            get
+            { return Fixture.Variables["commits"] as ICommit[]; }
+            set
+            { Fixture.Variables["commits"] = value; }
+        }
+
+        public ICommit FirstCommit
+        {
+            get
+            { return Fixture.Variables["firstCommit"] as ICommit; }
+            set
+            { Fixture.Variables["firstCommit"] = value; }
+        }
+
+        public ICommit LastCommit
+        {
+            get
+            { return Fixture.Variables["lastCommit"] as ICommit; }
+            set
+            { Fixture.Variables["lastCommit"] = value; }
+        }
+
+        public when_instantiating_the_asynchronous_dispatch_scheduler(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _commits = new[]
+            Commits = new[]
             {
-                firstCommit = CommitHelper.Create(),
-                lastCommit = CommitHelper.Create()
+                FirstCommit = CommitHelper.Create(),
+                LastCommit = CommitHelper.Create()
             };
 
-            A.CallTo(() => persistence.GetUndispatchedCommits()).Returns(_commits);
+            Dispatcher = A.Fake<IDispatchCommits>();
+            Persistence = A.Fake<IPersistStreams>();
+
+            A.CallTo(() => Persistence.GetUndispatchedCommits()).Returns(Commits);
         }
 
         protected override void Because()
         {
-            _dispatchScheduler = new AsynchronousDispatchScheduler(dispatcher, persistence);
-            _dispatchScheduler.Start();
+            DispatchScheduler = new AsynchronousDispatchScheduler(Dispatcher, Persistence);
+            DispatchScheduler.Start();
         }
 
         protected override void Cleanup()
         {
-            _dispatchScheduler.Dispose();
+            DispatchScheduler.Dispose();
         }
 
         [Fact]
@@ -52,92 +101,154 @@ namespace NEventStore.DispatcherTests
         [Fact]
         public void should_initialize_the_persistence_engine()
         {
-            A.CallTo(() => persistence.Initialize()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Persistence.Initialize()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void should_get_the_set_of_undispatched_commits()
         {
-            A.CallTo(() => persistence.GetUndispatchedCommits()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Persistence.GetUndispatchedCommits()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void should_provide_the_commits_to_the_dispatcher()
         {
-            A.CallTo(() => dispatcher.Dispatch(firstCommit)).MustHaveHappened();
-            A.CallTo(() => dispatcher.Dispatch(lastCommit)).MustHaveHappened();
+            A.CallTo(() => Dispatcher.Dispatch(FirstCommit)).MustHaveHappened();
+            A.CallTo(() => Dispatcher.Dispatch(LastCommit)).MustHaveHappened();
         }
     }
 
-    public class when_asynchronously_scheduling_a_commit_for_dispatch : SpecificationBase
+    public class when_asynchronously_scheduling_a_commit_for_dispatch : SpecificationBase<TestFixture>
     {
-        private readonly ICommit _commit = CommitHelper.Create();
-        private readonly IDispatchCommits dispatcher = A.Fake<IDispatchCommits>();
-        private readonly IPersistStreams persistence = A.Fake<IPersistStreams>();
-        private AsynchronousDispatchScheduler _dispatchScheduler;
+        public IDispatchCommits Dispatcher
+        {
+            get
+            { return Fixture.Variables["dispatcher"] as IDispatchCommits; }
+            set
+            { Fixture.Variables["dispatcher"] = value; }
+        }
+
+        public IPersistStreams Persistence
+        {
+            get
+            { return Fixture.Variables["persistence"] as IPersistStreams; }
+            set
+            { Fixture.Variables["persistence"] = value; }
+        }
+
+        private AsynchronousDispatchScheduler DispatchScheduler
+        {
+            get
+            { return Fixture.Variables["dispatchScheduler"] as AsynchronousDispatchScheduler; }
+            set
+            { Fixture.Variables["dispatchScheduler"] = value; }
+        }
+
+        public ICommit Commit
+        {
+            get
+            { return Fixture.Variables["commit"] as ICommit; }
+            set
+            { Fixture.Variables["commit"] = value; }
+        }
+
+        //private readonly ICommit _commit = CommitHelper.Create();
+        //private readonly IDispatchCommits dispatcher = A.Fake<IDispatchCommits>();
+        //private readonly IPersistStreams persistence = A.Fake<IPersistStreams>();
+        //private AsynchronousDispatchScheduler _dispatchScheduler;
+
+        public when_asynchronously_scheduling_a_commit_for_dispatch(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _dispatchScheduler = new AsynchronousDispatchScheduler(dispatcher, persistence);
-            _dispatchScheduler.Start();
+            Dispatcher = A.Fake<IDispatchCommits>();
+            Persistence = A.Fake<IPersistStreams>();
+            Commit = CommitHelper.Create();
+
+            DispatchScheduler = new AsynchronousDispatchScheduler(Dispatcher, Persistence);
+            DispatchScheduler.Start();
         }
 
         protected override void Because()
         {
-            _dispatchScheduler.ScheduleDispatch(_commit);
+            DispatchScheduler.ScheduleDispatch(Commit);
+            Thread.Sleep(250);
         }
 
         protected override void Cleanup()
         {
-            _dispatchScheduler.Dispose();
-        }
-
-        [Fact]
-        public void should_take_a_few_milliseconds_for_the_other_thread_to_execute()
-        {
-            Thread.Sleep(25); // just a precaution because we're doing async tests
+            DispatchScheduler.Dispose();
         }
 
         [Fact]
         public void should_provide_the_commit_to_the_dispatcher()
         {
-            A.CallTo(() => dispatcher.Dispatch(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Dispatcher.Dispatch(Commit)).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void should_mark_the_commit_as_dispatched()
         {
-            A.CallTo(() => persistence.MarkCommitAsDispatched(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Persistence.MarkCommitAsDispatched(Commit)).MustHaveHappenedOnceExactly();
         }
     }
 
-    public class when_disposing_the_async_dispatch_scheduler : SpecificationBase
+    public class when_disposing_the_async_dispatch_scheduler : SpecificationBase<TestFixture>
     {
-        private readonly IDispatchCommits dispatcher = A.Fake<IDispatchCommits>();
-        private readonly IPersistStreams persistence = A.Fake<IPersistStreams>();
-        private AsynchronousDispatchScheduler _dispatchScheduler;
+        public IDispatchCommits Dispatcher
+        {
+            get
+            { return Fixture.Variables["dispatcher"] as IDispatchCommits; }
+            set
+            { Fixture.Variables["dispatcher"] = value; }
+        }
+
+        public IPersistStreams Persistence
+        {
+            get
+            { return Fixture.Variables["persistence"] as IPersistStreams; }
+            set
+            { Fixture.Variables["persistence"] = value; }
+        }
+
+        private AsynchronousDispatchScheduler DispatchScheduler
+        {
+            get
+            { return Fixture.Variables["dispatchScheduler"] as AsynchronousDispatchScheduler; }
+            set
+            { Fixture.Variables["dispatchScheduler"] = value; }
+        }
+
+        public when_disposing_the_async_dispatch_scheduler(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
-            _dispatchScheduler = new AsynchronousDispatchScheduler(dispatcher, persistence);
+            Dispatcher = A.Fake<IDispatchCommits>();
+            Persistence = A.Fake<IPersistStreams>();
+
+            DispatchScheduler = new AsynchronousDispatchScheduler(Dispatcher, Persistence);
         }
 
         protected override void Because()
         {
-            _dispatchScheduler.Dispose();
-            _dispatchScheduler.Dispose();
+            DispatchScheduler.Dispose();
+            DispatchScheduler.Dispose();
         }
 
         [Fact]
         public void should_dispose_the_underlying_dispatcher_exactly_once()
         {
-            A.CallTo(() => dispatcher.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Dispatcher.Dispose()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]
         public void should_dispose_the_underlying_persistence_infrastructure_exactly_once()
         {
-            A.CallTo(() => persistence.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => Persistence.Dispose()).MustHaveHappenedOnceExactly();
         }
     }
 }

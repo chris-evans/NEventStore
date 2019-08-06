@@ -7,9 +7,7 @@ namespace NEventStore
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using FakeItEasy;
-    using FakeItEasy.ExtensionSyntax.Full;
     using NEventStore.Persistence;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
@@ -18,6 +16,10 @@ namespace NEventStore
     {
         public class when_disposing_the_decorator : using_underlying_persistence
         {
+            public when_disposing_the_decorator(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Because()
             {
                 Decorator.Dispose();
@@ -26,97 +28,170 @@ namespace NEventStore
             [Fact]
             public void should_dispose_the_underlying_persistence()
             {
-                A.CallTo(() => persistence.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.Dispose()).MustHaveHappenedOnceExactly();
             }
         }
 
         public class when_reading_the_all_events_from_date : using_underlying_persistence
         {
-            private ICommit _commit;
-            private DateTime _date;
-            private IPipelineHook _hook1;
-            private IPipelineHook _hook2;
+            private ICommit Commit
+            {
+                get
+                { return Fixture.Variables[nameof(Commit)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(Commit)] = value; }
+            }
+
+            private DateTime Date
+            {
+                get
+                { return (DateTime)Fixture.Variables[nameof(Date)]; }
+                set
+                { Fixture.Variables[nameof(Date)] = value; }
+            }
+
+            private IPipelineHook Hook1
+            {
+                get
+                { return Fixture.Variables[nameof(Hook1)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook1)] = value; }
+            }
+
+            private IPipelineHook Hook2
+            {
+                get
+                { return Fixture.Variables[nameof(Hook2)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook2)] = value; }
+            }
+
+            public when_reading_the_all_events_from_date(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _date = DateTime.Now;
-                _commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
+                base.Context();
 
-                _hook1 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook1.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook1);
+                Date = DateTime.Now;
+                Commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
 
-                _hook2 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook2.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook2);
+                Hook1 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook1.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook1);
 
-                A.CallTo(() => persistence.GetFrom(Bucket.Default, _date)).Returns(new List<ICommit> {_commit});
+                Hook2 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook2.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook2);
+
+                A.CallTo(() => Persistence.GetFrom(Bucket.Default, Date)).Returns(new List<ICommit> { Commit });
             }
 
             protected override void Because()
             {
                 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                 // Forces enumeration of commits.
-                Decorator.GetFrom(_date).ToList();
+                Decorator.GetFrom(Date).ToList();
             }
 
             [Fact]
             public void should_call_the_underlying_persistence_to_get_events()
             {
-                A.CallTo(() => persistence.GetFrom(Bucket.Default, _date)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.GetFrom(Bucket.Default, Date)).MustHaveHappenedOnceExactly();
             }
 
             [Fact]
             public void should_pass_all_events_through_the_pipeline_hooks()
             {
-                A.CallTo(() => _hook1.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
-                A.CallTo(() => _hook2.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Hook1.Select(Commit)).MustHaveHappenedOnceExactly();
+                A.CallTo(() => Hook2.Select(Commit)).MustHaveHappenedOnceExactly();
             }
         }
 
         public class when_reading_the_all_events_to_date : using_underlying_persistence
         {
-            private ICommit _commit;
-            private DateTime _end;
-            private IPipelineHook _hook1;
-            private IPipelineHook _hook2;
-            private DateTime _start;
+            private ICommit Commit
+            {
+                get
+                { return Fixture.Variables[nameof(Commit)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(Commit)] = value; }
+            }
+
+            private DateTime End
+            {
+                get
+                { return (DateTime)Fixture.Variables[nameof(End)]; }
+                set
+                { Fixture.Variables[nameof(End)] = value; }
+            }
+
+            private IPipelineHook Hook1
+            {
+                get
+                { return Fixture.Variables[nameof(Hook1)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook1)] = value; }
+            }
+
+            private IPipelineHook Hook2
+            {
+                get
+                { return Fixture.Variables[nameof(Hook2)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook2)] = value; }
+            }
+
+            private DateTime Start
+            {
+                get
+                { return (DateTime)Fixture.Variables[nameof(Start)]; }
+                set
+                { Fixture.Variables[nameof(Start)] = value; }
+            }
+
+            public when_reading_the_all_events_to_date(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _start = DateTime.Now;
-                _end = DateTime.Now;
-                _commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
+                base.Context();
 
-                _hook1 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook1.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook1);
+                Start = DateTime.Now;
+                End = DateTime.Now;
+                Commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
 
-                _hook2 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook2.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook2);
+                Hook1 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook1.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook1);
 
-                A.CallTo(() => persistence.GetFromTo(Bucket.Default, _start, _end)).Returns(new List<ICommit> {_commit});
+                Hook2 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook2.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook2);
+
+                A.CallTo(() => Persistence.GetFromTo(Bucket.Default, Start, End)).Returns(new List<ICommit> { Commit });
             }
 
             protected override void Because()
             {
                 // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
                 // Forces enumeration of commits
-                Decorator.GetFromTo(_start, _end).ToList();
+                Decorator.GetFromTo(Start, End).ToList();
             }
 
             [Fact]
             public void should_call_the_underlying_persistence_to_get_events()
             {
-                A.CallTo(() => persistence.GetFromTo(Bucket.Default, _start, _end)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.GetFromTo(Bucket.Default, Start, End)).MustHaveHappenedOnceExactly();
             }
 
             [Fact]
             public void should_pass_all_events_through_the_pipeline_hooks()
             {
-                A.CallTo(() => _hook1.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
-                A.CallTo(() => _hook2.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Hook1.Select(Commit)).MustHaveHappenedOnceExactly();
+                A.CallTo(() => Hook2.Select(Commit)).MustHaveHappenedOnceExactly();
             }
         }
 
@@ -124,9 +199,13 @@ namespace NEventStore
         {
             private CommitAttempt _attempt;
 
+            public when_committing(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Context()
             {
-                _attempt = new CommitAttempt(streamId, 1, Guid.NewGuid(), 1, DateTime.Now, null, new List<EventMessage> {new EventMessage()});
+                _attempt = new CommitAttempt(streamId, 1, Guid.NewGuid(), 1, DateTime.Now, null, new List<EventMessage> { new EventMessage() });
             }
 
             protected override void Because()
@@ -137,29 +216,54 @@ namespace NEventStore
             [Fact]
             public void should_dispose_the_underlying_persistence()
             {
-                A.CallTo(() => persistence.Commit(_attempt)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.Commit(_attempt)).MustHaveHappenedOnceExactly();
             }
         }
 
         public class when_reading_the_all_events_from_checkpoint : using_underlying_persistence
         {
-            private ICommit _commit;
-            private IPipelineHook _hook1;
-            private IPipelineHook _hook2;
+            private ICommit Commit
+            {
+                get
+                { return Fixture.Variables[nameof(Commit)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(Commit)] = value; }
+            }
+
+            private IPipelineHook Hook1
+            {
+                get
+                { return Fixture.Variables[nameof(Hook1)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook1)] = value; }
+            }
+
+            private IPipelineHook Hook2
+            {
+                get
+                { return Fixture.Variables[nameof(Hook2)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook2)] = value; }
+            }
+
+            public when_reading_the_all_events_from_checkpoint(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
+                base.Context();
+                Commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
 
-                _hook1 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook1.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook1);
+                Hook1 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook1.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook1);
 
-                _hook2 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook2.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook2);
+                Hook2 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook2.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook2);
 
-                A.CallTo(() => persistence.GetFrom(null)).Returns(new List<ICommit> {_commit});
+                A.CallTo(() => Persistence.GetFrom(null)).Returns(new List<ICommit> { Commit });
             }
 
             protected override void Because()
@@ -170,36 +274,62 @@ namespace NEventStore
             [Fact]
             public void should_call_the_underlying_persistence_to_get_events()
             {
-                A.CallTo(() => persistence.GetFrom(null)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.GetFrom(null)).MustHaveHappenedOnceExactly();
             }
 
             [Fact]
             public void should_pass_all_events_through_the_pipeline_hooks()
             {
-                A.CallTo(() => _hook1.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
-                A.CallTo(() => _hook2.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Hook1.Select(Commit)).MustHaveHappenedOnceExactly();
+                A.CallTo(() => Hook2.Select(Commit)).MustHaveHappenedOnceExactly();
             }
         }
 
         public class when_reading_the_all_events_get_undispatched : using_underlying_persistence
         {
-            private ICommit _commit;
-            private IPipelineHook _hook1;
-            private IPipelineHook _hook2;
+            private ICommit Commit
+            {
+                get
+                { return Fixture.Variables[nameof(Commit)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(Commit)] = value; }
+            }
+
+            private IPipelineHook Hook1
+            {
+                get
+                { return Fixture.Variables[nameof(Hook1)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook1)] = value; }
+            }
+
+            private IPipelineHook Hook2
+            {
+                get
+                { return Fixture.Variables[nameof(Hook2)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook2)] = value; }
+            }
+
+            public when_reading_the_all_events_get_undispatched(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
+                base.Context();
 
-                _hook1 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook1.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook1);
+                Commit = new Commit(Bucket.Default, streamId, 1, Guid.NewGuid(), 1, DateTime.Now, new LongCheckpoint(0).Value, null, null);
 
-                _hook2 = A.Fake<IPipelineHook>();
-                A.CallTo(() => _hook2.Select(_commit)).Returns(_commit);
-                pipelineHooks.Add(_hook2);
+                Hook1 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook1.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook1);
 
-                A.CallTo(() => persistence.GetUndispatchedCommits()).Returns(new List<ICommit> {_commit});
+                Hook2 = A.Fake<IPipelineHook>();
+                A.CallTo(() => Hook2.Select(Commit)).Returns(Commit);
+                PipelineHooks.Add(Hook2);
+
+                A.CallTo(() => Persistence.GetUndispatchedCommits()).Returns(new List<ICommit> { Commit });
             }
 
             protected override void Because()
@@ -210,14 +340,14 @@ namespace NEventStore
             [Fact]
             public void should_call_the_underlying_persistence_to_get_events()
             {
-                A.CallTo(() => persistence.GetUndispatchedCommits()).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Persistence.GetUndispatchedCommits()).MustHaveHappenedOnceExactly();
             }
 
             [Fact]
             public void should_pass_all_events_through_the_pipeline_hooks()
             {
-                A.CallTo(() => _hook1.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
-                A.CallTo(() => _hook2.Select(_commit)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Hook1.Select(Commit)).MustHaveHappenedOnceExactly();
+                A.CallTo(() => Hook2.Select(Commit)).MustHaveHappenedOnceExactly();
             }
         }
 
@@ -225,10 +355,14 @@ namespace NEventStore
         {
             private IPipelineHook _hook;
 
+            public when_purging(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Context()
             {
                 _hook = A.Fake<IPipelineHook>();
-                pipelineHooks.Add(_hook);
+                PipelineHooks.Add(_hook);
             }
 
             protected override void Because()
@@ -239,7 +373,7 @@ namespace NEventStore
             [Fact]
             public void should_call_the_pipeline_hook_purge()
             {
-                A.CallTo(() => _hook.OnPurge(null)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => _hook.OnPurge(null)).MustHaveHappenedOnceExactly();
             }
         }
 
@@ -248,10 +382,14 @@ namespace NEventStore
             private IPipelineHook _hook;
             private const string _bucketId = "Bucket";
 
+            public when_purging_a_bucket(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Context()
             {
                 _hook = A.Fake<IPipelineHook>();
-                pipelineHooks.Add(_hook);
+                PipelineHooks.Add(_hook);
             }
 
             protected override void Because()
@@ -262,20 +400,32 @@ namespace NEventStore
             [Fact]
             public void should_call_the_pipeline_hook_purge()
             {
-                A.CallTo(() => _hook.OnPurge(_bucketId)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => _hook.OnPurge(_bucketId)).MustHaveHappenedOnceExactly();
             }
         }
 
         public class when_deleting_a_stream : using_underlying_persistence
         {
-            private IPipelineHook _hook;
+            private IPipelineHook Hook
+            {
+                get
+                { return Fixture.Variables[nameof(Hook)] as IPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook)] = value; }
+            }
+
             private const string _bucketId = "Bucket";
             private const string _streamId = "Stream";
 
+            public when_deleting_a_stream(TestFixture fixture)
+                : base(fixture)
+            { }
+
             protected override void Context()
             {
-                _hook = A.Fake<IPipelineHook>();
-                pipelineHooks.Add(_hook);
+                base.Context();
+                Hook = A.Fake<IPipelineHook>();
+                PipelineHooks.Add(Hook);
             }
 
             protected override void Because()
@@ -286,21 +436,64 @@ namespace NEventStore
             [Fact]
             public void should_call_the_pipeline_hook_purge()
             {
-                A.CallTo(() => _hook.OnDeleteStream(_bucketId, _streamId)).MustHaveHappened(Repeated.Exactly.Once);
+                A.CallTo(() => Hook.OnDeleteStream(_bucketId, _streamId)).MustHaveHappenedOnceExactly();
             }
         }
 
-        public abstract class using_underlying_persistence : SpecificationBase
+        public abstract class using_underlying_persistence : SpecificationBase<TestFixture>
         {
-            private PipelineHooksAwarePersistanceDecorator decorator;
-            protected readonly IPersistStreams persistence = A.Fake<IPersistStreams>();
-            protected readonly List<IPipelineHook> pipelineHooks = new List<IPipelineHook>();
             protected readonly string streamId = Guid.NewGuid().ToString();
 
-            public PipelineHooksAwarePersistanceDecorator Decorator
+            public using_underlying_persistence(TestFixture fixture)
+                : base(fixture)
+            { }
+
+            protected List<IPipelineHook> PipelineHooks
             {
-                get { return decorator ?? (decorator = new PipelineHooksAwarePersistanceDecorator(persistence, pipelineHooks.Select(x => x))); }
-                set { decorator = value; }
+                get
+                {
+                    if (!Fixture.Variables.TryGetValue(nameof(PipelineHooks), out var pipelineHooks))
+                    {
+                        pipelineHooks = new List<IPipelineHook>();
+                        PipelineHooks = pipelineHooks as List<IPipelineHook>;
+                    }
+
+                    return pipelineHooks as List<IPipelineHook>;
+                }
+                set
+                { Fixture.Variables[nameof(PipelineHooks)] = value; }
+            }
+
+            protected IPersistStreams Persistence
+            {
+                get
+                {
+                    if (!Fixture.Variables.TryGetValue(nameof(Persistence), out var persistence))
+                    {
+                        persistence = A.Fake<IPersistStreams>();
+                        Persistence = persistence as IPersistStreams;
+                    }
+
+                    return persistence as IPersistStreams;
+                }
+                set
+                { Fixture.Variables[nameof(Persistence)] = value; }
+            }
+
+            protected PipelineHooksAwarePersistanceDecorator Decorator
+            {
+                get
+                {
+                    if (!Fixture.Variables.TryGetValue(nameof(Decorator), out var decorator))
+                    {
+                        decorator = new PipelineHooksAwarePersistanceDecorator(Persistence, PipelineHooks.Select(x => x));
+                        Decorator = decorator as PipelineHooksAwarePersistanceDecorator;
+                    }
+
+                    return decorator as PipelineHooksAwarePersistanceDecorator;
+                }
+                set
+                { Fixture.Variables[nameof(Decorator)] = value; }
             }
         }
     }

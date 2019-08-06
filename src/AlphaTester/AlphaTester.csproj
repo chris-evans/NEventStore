@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AlphaTester</RootNamespace>
     <AssemblyName>AlphaTester</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -64,11 +64,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NEventStore.Persistence.AzureBlob\NEventStore.Persistence.AzureBlob.csproj">
-      <Project>{88b5b4c3-7019-43a7-8348-94a42a87f06f}</Project>
+      <Project>{5eacc7cb-2003-482e-95f2-e8b202bac017}</Project>
       <Name>NEventStore.Persistence.AzureBlob</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NEventStore.Persistence.Sql\NEventStore.Persistence.Sql.csproj">
+      <Project>{c388c68e-c7b5-40c5-b177-86f58cb001ad}</Project>
+      <Name>NEventStore.Persistence.Sql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NEventStore\NEventStore.csproj">
-      <Project>{03946843-f343-419c-88ef-3e446d08dfa6}</Project>
+      <Project>{b2815441-6cd7-4bd1-8154-d6d5e0aa6b39}</Project>
       <Name>NEventStore</Name>
     </ProjectReference>
   </ItemGroup>

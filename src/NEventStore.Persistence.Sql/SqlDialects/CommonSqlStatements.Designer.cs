@@ -65,7 +65,7 @@ namespace NEventStore.Persistence.Sql.SqlDialects {
         ///INTO Snapshots
         /// ( BucketId, StreamId, StreamRevision, Payload )
         ///SELECT @BucketId, @StreamId, @StreamRevision, @Payload
-        /// /*FROM DUAL*/
+        ////*FROM DUAL*/
         ///WHERE EXISTS
         /// ( SELECT *
         ///     FROM Commits

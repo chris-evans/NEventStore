@@ -3,16 +3,20 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using FluentAssertions;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
 
-    public class when_getting_from_to_then_should_not_get_later_commits : SpecificationBase
+    public class when_getting_from_to_then_should_not_get_later_commits : SpecificationBase<TestFixture>
     {
         private readonly DateTime _endDate = new DateTime(2013, 1, 2);
         private readonly DateTime _startDate = new DateTime(2013, 1, 1);
         private ICommit[] _commits;
         private InMemoryPersistenceEngine _engine;
+
+        public when_getting_from_to_then_should_not_get_later_commits(TestFixture fixture)
+            : base(fixture)
+        { }
 
         protected override void Context()
         {
@@ -31,7 +35,7 @@
         [Fact]
         public void should_return_two_commits()
         {
-            _commits.Length.ShouldBe(1);
+            _commits.Length.Should().Be(1);
         }
     }
 }

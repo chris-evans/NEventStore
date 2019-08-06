@@ -7,11 +7,11 @@ namespace NEventStore
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using FluentAssertions;
     using NEventStore.Persistence;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
     using Xunit;
-    using Xunit.Should;
 
     public class OptimisticPipelineHookTests
     {
@@ -24,6 +24,10 @@ namespace NEventStore
             private ICommit _alreadyCommitted;
             private CommitAttempt _beyondEndOfStream;
             private Exception _thrown;
+
+            public when_committing_with_a_sequence_beyond_the_known_end_of_a_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -41,7 +45,7 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_PersistenceException()
             {
-                _thrown.ShouldBeInstanceOf<StorageException>();
+                _thrown.Should().BeOfType<StorageException>();
             }
         }
 
@@ -55,6 +59,10 @@ namespace NEventStore
             private ICommit _alreadyCommitted;
             private CommitAttempt _beyondEndOfStream;
             private Exception _thrown;
+
+            public when_committing_with_a_revision_beyond_the_known_end_of_a_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -72,7 +80,7 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_PersistenceException()
             {
-                _thrown.ShouldBeInstanceOf<StorageException>();
+                _thrown.Should().BeOfType<StorageException>();
             }
         }
 
@@ -85,6 +93,10 @@ namespace NEventStore
             private ICommit Committed;
 
             private Exception thrown;
+
+            public when_committing_with_a_sequence_less_or_equal_to_the_most_recent_sequence_for_the_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -102,7 +114,7 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_ConcurrencyException()
             {
-                thrown.ShouldBeInstanceOf<ConcurrencyException>();
+                thrown.Should().BeOfType<ConcurrencyException>();
             }
         }
 
@@ -114,6 +126,10 @@ namespace NEventStore
             private ICommit _committed;
             private CommitAttempt _failedAttempt;
             private Exception _thrown;
+
+            public when_committing_with_a_revision_less_or_equal_to_than_the_most_recent_revision_read_for_the_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -131,7 +147,7 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_ConcurrencyException()
             {
-                _thrown.ShouldBeInstanceOf<ConcurrencyException>();
+                _thrown.Should().BeOfType<ConcurrencyException>();
             }
         }
 
@@ -141,6 +157,10 @@ namespace NEventStore
             private CommitAttempt _failedAttempt;
             private ICommit _successfulAttempt;
             private Exception _thrown;
+
+            public when_committing_with_a_commit_sequence_less_than_or_equal_to_the_most_recent_commit_for_the_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -158,7 +178,7 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_ConcurrencyException()
             {
-                _thrown.ShouldBeInstanceOf<ConcurrencyException>();
+                _thrown.Should().BeOfType<ConcurrencyException>();
             }
         }
 
@@ -169,6 +189,10 @@ namespace NEventStore
             private CommitAttempt _failedAttempt;
             private ICommit _successfulAttempt;
             private Exception _thrown;
+
+            public when_committing_with_a_stream_revision_less_than_or_equal_to_the_most_recent_commit_for_the_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -186,57 +210,74 @@ namespace NEventStore
             [Fact]
             public void should_throw_a_ConcurrencyException()
             {
-                _thrown.ShouldBeInstanceOf<ConcurrencyException>();
+                _thrown.Should().BeOfType<ConcurrencyException>();
             }
         }
 
-        public class when_tracking_commits : SpecificationBase
+        public class when_tracking_commits : SpecificationBase<TestFixture>
         {
             private const int MaxStreamsToTrack = 2;
-            private ICommit[] _trackedCommitAttempts;
 
-            private OptimisticPipelineHook _hook;
+            private ICommit[] TrackedCommitAttempts
+            {
+                get
+                { return Fixture.Variables[nameof(TrackedCommitAttempts)] as ICommit[]; }
+                set
+                { Fixture.Variables[nameof(TrackedCommitAttempts)] = value; }
+            }
+
+            private OptimisticPipelineHook Hook
+            {
+                get
+                { return Fixture.Variables[nameof(Hook)] as OptimisticPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook)] = value; }
+            }
+
+            public when_tracking_commits(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _trackedCommitAttempts = new[]
+                TrackedCommitAttempts = new[]
                 {
                     BuildCommit(Guid.NewGuid(), Guid.NewGuid()),
                     BuildCommit(Guid.NewGuid(), Guid.NewGuid()),
                     BuildCommit(Guid.NewGuid(), Guid.NewGuid())
                 };
 
-                _hook = new OptimisticPipelineHook(MaxStreamsToTrack);
+                Hook = new OptimisticPipelineHook(MaxStreamsToTrack);
             }
 
             protected override void Because()
             {
-                foreach (var commit in _trackedCommitAttempts)
+                foreach (var commit in TrackedCommitAttempts)
                 {
-                    _hook.Track(commit);
+                    Hook.Track(commit);
                 }
             }
 
             [Fact]
             public void should_only_contain_streams_explicitly_tracked()
             {
-                ICommit untracked = BuildCommit(Guid.Empty, _trackedCommitAttempts[0].CommitId);
-                _hook.Contains(untracked).ShouldBeFalse();
+                ICommit untracked = BuildCommit(Guid.Empty, TrackedCommitAttempts[0].CommitId);
+                Hook.Contains(untracked).Should().BeFalse();
             }
 
             [Fact]
             public void should_find_tracked_streams()
             {
-                ICommit stillTracked = BuildCommit(_trackedCommitAttempts.Last().StreamId, _trackedCommitAttempts.Last().CommitId);
-                _hook.Contains(stillTracked).ShouldBeTrue();
+                ICommit stillTracked = BuildCommit(TrackedCommitAttempts.Last().StreamId, TrackedCommitAttempts.Last().CommitId);
+                Hook.Contains(stillTracked).Should().BeTrue();
             }
 
             [Fact]
             public void should_only_track_the_specified_number_of_streams()
             {
                 ICommit droppedFromTracking = BuildCommit(
-                    _trackedCommitAttempts.First().StreamId, _trackedCommitAttempts.First().CommitId);
-                _hook.Contains(droppedFromTracking).ShouldBeFalse();
+                    TrackedCommitAttempts.First().StreamId, TrackedCommitAttempts.First().CommitId);
+                Hook.Contains(droppedFromTracking).Should().BeFalse();
             }
 
             private ICommit BuildCommit(Guid streamId, Guid commitId)
@@ -250,10 +291,14 @@ namespace NEventStore
             }
         }
 
-        public class when_purging : SpecificationBase
+        public class when_purging : SpecificationBase<TestFixture>
         {
             private ICommit _trackedCommit;
             private OptimisticPipelineHook _hook;
+
+            public when_purging(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
@@ -270,7 +315,7 @@ namespace NEventStore
             [Fact]
             public void should_not_track_commit()
             {
-                _hook.Contains(_trackedCommit).ShouldBeFalse();
+                _hook.Contains(_trackedCommit).Should().BeFalse();
             }
 
             private ICommit BuildCommit(Guid bucketId, Guid streamId, Guid commitId)
@@ -280,36 +325,60 @@ namespace NEventStore
             }
         }
 
-        public class when_purging_a_bucket : SpecificationBase
+        public class when_purging_a_bucket : SpecificationBase<TestFixture>
         {
-            private ICommit _trackedCommitBucket1;
-            private ICommit _trackedCommitBucket2;
-            private OptimisticPipelineHook _hook;
+            private ICommit TrackedCommitBucket1
+            {
+                get
+                { return Fixture.Variables[nameof(TrackedCommitBucket1)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(TrackedCommitBucket1)] = value; }
+            }
+
+            private ICommit TrackedCommitBucket2
+            {
+                get
+                { return Fixture.Variables[nameof(TrackedCommitBucket2)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(TrackedCommitBucket2)] = value; }
+            }
+
+            private OptimisticPipelineHook Hook
+            {
+                get
+                { return Fixture.Variables[nameof(Hook)] as OptimisticPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook)] = value; }
+            }
+
+            public when_purging_a_bucket(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _trackedCommitBucket1 = BuildCommit(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-                _trackedCommitBucket2 = BuildCommit(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-                _hook = new OptimisticPipelineHook();
-                _hook.Track(_trackedCommitBucket1);
-                _hook.Track(_trackedCommitBucket2);
+                TrackedCommitBucket1 = BuildCommit(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+                TrackedCommitBucket2 = BuildCommit(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+                Hook = new OptimisticPipelineHook();
+                Hook.Track(TrackedCommitBucket1);
+                Hook.Track(TrackedCommitBucket2);
             }
 
             protected override void Because()
             {
-                _hook.OnPurge(_trackedCommitBucket1.BucketId);
+                Hook.OnPurge(TrackedCommitBucket1.BucketId);
             }
 
             [Fact]
             public void should_not_track_the_commit_in_bucket()
             {
-                _hook.Contains(_trackedCommitBucket1).ShouldBeFalse();
+                Hook.Contains(TrackedCommitBucket1).Should().BeFalse();
             }
 
             [Fact]
             public void should_track_the_commit_in_other_bucket()
             {
-                _hook.Contains(_trackedCommitBucket2).ShouldBeTrue();
+                Hook.Contains(TrackedCommitBucket2).Should().BeTrue();
             }
 
             private ICommit BuildCommit(Guid bucketId, Guid streamId, Guid commitId)
@@ -319,38 +388,80 @@ namespace NEventStore
             }
         }
 
-        public class when_deleting_a_stream : SpecificationBase
+        public class when_deleting_a_stream : SpecificationBase<TestFixture>
         {
-            private ICommit _trackedCommit;
-            private ICommit _trackedCommitDeleted;
-            private OptimisticPipelineHook _hook;
-            private readonly Guid _bucketId = Guid.NewGuid();
-            private readonly Guid _streamIdDeleted = Guid.NewGuid();
+            private ICommit TrackedCommit
+            {
+                get
+                { return Fixture.Variables[nameof(TrackedCommit)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(TrackedCommit)] = value; }
+            }
+
+            private ICommit TrackedCommitDeleted
+            {
+                get
+                { return Fixture.Variables[nameof(TrackedCommitDeleted)] as ICommit; }
+                set
+                { Fixture.Variables[nameof(TrackedCommitDeleted)] = value; }
+            }
+
+            private OptimisticPipelineHook Hook
+            {
+                get
+                { return Fixture.Variables[nameof(Hook)] as OptimisticPipelineHook; }
+                set
+                { Fixture.Variables[nameof(Hook)] = value; }
+            }
+
+            private Guid BucketId
+            {
+                get
+                { return (Guid)Fixture.Variables[nameof(BucketId)]; }
+                set
+                { Fixture.Variables[nameof(BucketId)] = value; }
+            }
+
+            private Guid StreamIdDeleted
+            {
+                get
+                { return (Guid)Fixture.Variables[nameof(StreamIdDeleted)]; }
+                set
+                { Fixture.Variables[nameof(StreamIdDeleted)] = value; }
+            }
+
+            public when_deleting_a_stream(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected override void Context()
             {
-                _trackedCommit = BuildCommit(_bucketId, Guid.NewGuid(), Guid.NewGuid());
-                _trackedCommitDeleted = BuildCommit(_bucketId, _streamIdDeleted, Guid.NewGuid());
-                _hook = new OptimisticPipelineHook();
-                _hook.Track(_trackedCommit);
-                _hook.Track(_trackedCommitDeleted);
+                base.Context();
+                BucketId = Guid.NewGuid();
+                StreamIdDeleted = Guid.NewGuid();
+
+                TrackedCommit = BuildCommit(BucketId, Guid.NewGuid(), Guid.NewGuid());
+                TrackedCommitDeleted = BuildCommit(BucketId, StreamIdDeleted, Guid.NewGuid());
+                Hook = new OptimisticPipelineHook();
+                Hook.Track(TrackedCommit);
+                Hook.Track(TrackedCommitDeleted);
             }
 
             protected override void Because()
             {
-                _hook.OnDeleteStream(_trackedCommitDeleted.BucketId, _trackedCommitDeleted.StreamId);
+                Hook.OnDeleteStream(TrackedCommitDeleted.BucketId, TrackedCommitDeleted.StreamId);
             }
 
             [Fact]
             public void should_not_track_the_commit_in_the_deleted_stream()
             {
-                _hook.Contains(_trackedCommitDeleted).ShouldBeFalse();
+                Hook.Contains(TrackedCommitDeleted).Should().BeFalse();
             }
 
             [Fact]
             public void should_track_the_commit_that_is_not_in_the_deleted_stream()
             {
-                _hook.Contains(_trackedCommit).ShouldBeTrue();
+                Hook.Contains(TrackedCommit).Should().BeTrue();
             }
 
             private ICommit BuildCommit(Guid bucketId, Guid streamId, Guid commitId)
@@ -360,10 +471,14 @@ namespace NEventStore
             }
         }
 
-        public abstract class using_commit_hooks : SpecificationBase
+        public abstract class using_commit_hooks : SpecificationBase<TestFixture>
         {
             protected readonly OptimisticPipelineHook Hook = new OptimisticPipelineHook();
             private readonly string _streamId = Guid.NewGuid().ToString();
+
+            public using_commit_hooks(TestFixture fixture)
+                : base(fixture)
+            { }
 
             protected CommitAttempt BuildCommitStub(Guid commitId)
             {

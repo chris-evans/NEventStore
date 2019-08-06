@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".test", ".test", "{D3C17830
 		NEventStore.Persistence.AcceptanceTests\SerializationTests.cs = NEventStore.Persistence.AcceptanceTests\SerializationTests.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore", "NEventStore\NEventStore.csproj", "{03946843-F343-419C-88EF-3E446D08DFA6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{CD37080A-F48D-4E5D-B7C6-B9F86BB05A38}"
 	ProjectSection(SolutionItems) = preProject
 		..\readme.markdown = ..\readme.markdown
@@ -26,15 +24,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{08A28C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Persistence.AcceptanceTests", "NEventStore.Persistence.AcceptanceTests\NEventStore.Persistence.AcceptanceTests.csproj", "{3FE594FE-16FF-4405-97D5-5A58FB12520B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{D35087BF-941A-49EA-96A8-B10457C4D169}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Tests", "NEventStore.Tests\NEventStore.Tests.csproj", "{785B7EF4-BD47-4F98-9802-DA1C4A55ECA4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persistence.azureblob", "persistence.azureblob", "{D802D97D-46BD-4E0B-8482-BD46F5548AC0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Persistence.AzureBlob", "NEventStore.Persistence.AzureBlob\NEventStore.Persistence.AzureBlob.csproj", "{88B5B4C3-7019-43A7-8348-94A42A87F06F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaTester", "AlphaTester\AlphaTester.csproj", "{4585AE1C-4F09-44C1-A1E9-32CB5D599221}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NEventStore.Persistence.Sql", "NEventStore.Persistence.Sql\NEventStore.Persistence.Sql.csproj", "{C388C68E-C7B5-40C5-B177-86F58CB001AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NEventStore", "NEventStore\NEventStore.csproj", "{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NEventStore.Persistence.AzureBlob", "NEventStore.Persistence.AzureBlob\NEventStore.Persistence.AzureBlob.csproj", "{5EACC7CB-2003-482E-95F2-E8B202BAC017}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39} = {B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,10 +43,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{03946843-F343-419C-88EF-3E446D08DFA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03946843-F343-419C-88EF-3E446D08DFA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03946843-F343-419C-88EF-3E446D08DFA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03946843-F343-419C-88EF-3E446D08DFA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3FE594FE-16FF-4405-97D5-5A58FB12520B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3FE594FE-16FF-4405-97D5-5A58FB12520B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FE594FE-16FF-4405-97D5-5A58FB12520B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,23 +51,25 @@ Global
 		{785B7EF4-BD47-4F98-9802-DA1C4A55ECA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{785B7EF4-BD47-4F98-9802-DA1C4A55ECA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{785B7EF4-BD47-4F98-9802-DA1C4A55ECA4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88B5B4C3-7019-43A7-8348-94A42A87F06F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88B5B4C3-7019-43A7-8348-94A42A87F06F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88B5B4C3-7019-43A7-8348-94A42A87F06F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88B5B4C3-7019-43A7-8348-94A42A87F06F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4585AE1C-4F09-44C1-A1E9-32CB5D599221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4585AE1C-4F09-44C1-A1E9-32CB5D599221}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4585AE1C-4F09-44C1-A1E9-32CB5D599221}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4585AE1C-4F09-44C1-A1E9-32CB5D599221}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C388C68E-C7B5-40C5-B177-86F58CB001AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C388C68E-C7B5-40C5-B177-86F58CB001AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C388C68E-C7B5-40C5-B177-86F58CB001AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C388C68E-C7B5-40C5-B177-86F58CB001AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2815441-6CD7-4BD1-8154-D6D5E0AA6B39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EACC7CB-2003-482E-95F2-E8B202BAC017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EACC7CB-2003-482E-95F2-E8B202BAC017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EACC7CB-2003-482E-95F2-E8B202BAC017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EACC7CB-2003-482E-95F2-E8B202BAC017}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{03946843-F343-419C-88EF-3E446D08DFA6} = {D35087BF-941A-49EA-96A8-B10457C4D169}
-		{3FE594FE-16FF-4405-97D5-5A58FB12520B} = {D3C17830-A461-4BA5-A672-461B19B33936}
-		{785B7EF4-BD47-4F98-9802-DA1C4A55ECA4} = {D35087BF-941A-49EA-96A8-B10457C4D169}
-		{88B5B4C3-7019-43A7-8348-94A42A87F06F} = {D802D97D-46BD-4E0B-8482-BD46F5548AC0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1F92DE4F-FB56-4070-AD73-D00DA64849D8}
