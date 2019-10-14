@@ -2,6 +2,7 @@ namespace NEventStore.Serialization
 {
     using System.IO;
     using System.Runtime.Serialization;
+    using System.Runtime.Serialization.Formatters;
     using System.Runtime.Serialization.Formatters.Binary;
     using NEventStore.Logging;
 
@@ -9,6 +10,13 @@ namespace NEventStore.Serialization
     {
         private static readonly ILog Logger = LogFactory.BuildLogger(typeof (BinarySerializer));
         private readonly IFormatter _formatter = new BinaryFormatter();
+
+        public BinarySerializer(FormatterAssemblyStyle assemblyFormat)
+        {
+            var formatter = new BinaryFormatter();
+            formatter.AssemblyFormat = assemblyFormat;
+            _formatter = formatter;
+        }
 
         public virtual void Serialize<T>(Stream output, T graph)
         {

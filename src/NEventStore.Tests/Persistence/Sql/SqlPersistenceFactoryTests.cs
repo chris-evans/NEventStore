@@ -1,6 +1,7 @@
 ﻿namespace NEventStore.Persistence.Sql
 {
     using System;
+    using System.Runtime.Serialization.Formatters;
     using FluentAssertions;
     using NEventStore.Persistence.AcceptanceTests;
     using NEventStore.Persistence.AcceptanceTests.BDD;
@@ -19,7 +20,7 @@
         protected override void Because()
         {
             _exception = Catch.Exception(() => new SqlPersistenceFactory("Connection",
-                new BinarySerializer(),
+                new BinarySerializer(FormatterAssemblyStyle.Full),
                 new OracleNativeDialect()).Build());
         }
 

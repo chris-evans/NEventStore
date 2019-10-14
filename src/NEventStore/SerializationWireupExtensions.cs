@@ -1,12 +1,17 @@
 namespace NEventStore
 {
     using NEventStore.Serialization;
+    using System.Runtime.Serialization.Formatters;
 
     public static class SerializationWireupExtensions
     {
-        public static SerializationWireup UsingBinarySerialization(this PersistenceWireup wireup)
+        /// <summary>
+        /// ueses BinaryFormatter for serialization
+        /// </summary>
+        /// <param name="assemblyFormat">set to simple for version agnostic deserialization</param>
+        public static SerializationWireup UsingBinarySerialization(this PersistenceWireup wireup, FormatterAssemblyStyle assemblyFormat = FormatterAssemblyStyle.Full)
         {
-            return wireup.UsingCustomSerialization(new BinarySerializer());
+            return wireup.UsingCustomSerialization(new BinarySerializer(assemblyFormat));
         }
 
         public static SerializationWireup UsingCustomSerialization(this PersistenceWireup wireup, ISerialize serializer)
